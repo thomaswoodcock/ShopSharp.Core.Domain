@@ -1,14 +1,17 @@
 using Nuke.Common;
 using Nuke.Common.CI.GitHubActions;
+using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
+using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions(
     "continuous",
     GitHubActionsImage.UbuntuLatest,
     On = new[] { GitHubActionsTrigger.Push },
+    InvokedTargets = new[] { nameof(Pack) },
     FetchDepth = 0)]
 class Build : NukeBuild
 {
@@ -19,10 +22,14 @@ class Build : NukeBuild
 
     [Solution(GenerateProjects = true)] readonly Solution Solution;
 
+    static AbsolutePath ArtifactDirectory => RootDirectory / "artifacts";
+    static AbsolutePath PackageDirectory => ArtifactDirectory / "packages";
+
     Target Clean => _ => _
-        .Description("Cleans the project")
+        .Description("Cleans the project and build artifact directory")
         .Executes(() =>
         {
+            EnsureCleanDirectory(ArtifactDirectory);
             DotNetClean(settings => settings.SetProject(Solution));
         });
 
@@ -60,5 +67,20 @@ class Build : NukeBuild
                 .EnableNoBuild());
         });
 
-    public static int Main() => Execute<Build>(x => x.Test);
+    Target Pack => _ => _
+        .Description("Generates the project package")
+        .DependsOn(Test)
+        .Produces(PackageDirectory)
+        .Executes(() =>
+        {
+            DotNetPack(settings => settings
+                .SetProject(Solution.ShopSharp_Core_Domain)
+                .SetConfiguration(Configuration)
+                .SetOutputDirectory(PackageDirectory)
+                .SetVersion(GitVersion.NuGetVersionV2)
+                .EnableNoRestore()
+                .EnableNoBuild());
+        });
+
+    public static int Main() => Execute<Build>(x => x.Pack);
 }
