@@ -8,7 +8,8 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 [GitHubActions(
     "continuous",
     GitHubActionsImage.UbuntuLatest,
-    On = new[] { GitHubActionsTrigger.Push })]
+    On = new[] { GitHubActionsTrigger.Push },
+    FetchDepth = 0)]
 class Build : NukeBuild
 {
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
