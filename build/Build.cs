@@ -2,17 +2,20 @@ using Nuke.Common;
 using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
+using Nuke.Common.Tools.GitVersion;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions(
     "continuous",
     GitHubActionsImage.UbuntuLatest,
     On = new[] { GitHubActionsTrigger.Push },
-    InvokedTargets = new[] { nameof(Test) })]
+    FetchDepth = 0)]
 class Build : NukeBuild
 {
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
+
+    [GitVersion] readonly GitVersion GitVersion;
 
     [Solution(GenerateProjects = true)] readonly Solution Solution;
 
@@ -39,6 +42,9 @@ class Build : NukeBuild
             DotNetBuild(settings => settings
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
+                .SetAssemblyVersion(GitVersion.AssemblySemVer)
+                .SetFileVersion(GitVersion.AssemblySemFileVer)
+                .SetInformationalVersion(GitVersion.InformationalVersion)
                 .EnableNoRestore());
         });
 

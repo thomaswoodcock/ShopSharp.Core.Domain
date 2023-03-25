@@ -24,6 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Cache .nuke/temp, ~/.nuget/packages
         uses: actions/cache@v3
         with:
@@ -31,5 +33,5 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: Run './build.cmd Test'
-        run: ./build.cmd Test
+      - name: Run './build.cmd '
+        run: ./build.cmd 
