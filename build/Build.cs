@@ -22,7 +22,6 @@ class Build : NukeBuild
     [Solution(GenerateProjects = true)] readonly Solution Solution;
 
     static AbsolutePath ArtifactDirectory => RootDirectory / "artifacts";
-    static AbsolutePath PackageDirectory => ArtifactDirectory / "packages";
 
     Target Clean => _ => _
         .Description("Cleans the project and build artifact directory")
@@ -75,7 +74,7 @@ class Build : NukeBuild
             DotNetPack(settings => settings
                 .SetProject(Solution.ShopSharp_Core_Domain)
                 .SetConfiguration(Configuration)
-                .SetOutputDirectory(PackageDirectory)
+                .SetOutputDirectory(ArtifactDirectory)
                 .SetVersion(GitVersion.NuGetVersionV2)
                 .EnableNoRestore()
                 .EnableNoBuild());
