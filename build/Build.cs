@@ -99,7 +99,7 @@ class Build : NukeBuild
         .OnlyWhenStatic(() => Configuration == Configuration.Release && GitRepository.IsOnMainBranch())
         .Executes(() =>
         {
-            GlobFiles(ArtifactDirectory, "*.nupkg", "*.snupkg")
+            GlobFiles(ArtifactDirectory, "*.nupkg")
                 .ForEach(file =>
                 {
                     DotNetNuGetPush(settings => settings
