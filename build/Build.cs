@@ -14,7 +14,9 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     "continuous",
     GitHubActionsImage.UbuntuLatest,
     On = new[] { GitHubActionsTrigger.Push },
-    FetchDepth = 0)]
+    FetchDepth = 0,
+    ImportSecrets = new[] { nameof(NuGetApiKey) },
+    InvokedTargets = new[] { nameof(Publish) })]
 class Build : NukeBuild
 {
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
@@ -93,8 +95,7 @@ class Build : NukeBuild
     Target Publish => _ => _
         .Description("Publishes the generated project package")
         .DependsOn(Test, Pack)
-        .Requires(() => NuGetSource)
-        .Requires(() => NuGetApiKey)
+        .Requires(() => NuGetSource, () => NuGetApiKey)
         .OnlyWhenStatic(() => Configuration == Configuration.Release && GitRepository.IsOnMainBranch())
         .Executes(() =>
         {
