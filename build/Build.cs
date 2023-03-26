@@ -11,7 +11,6 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     "continuous",
     GitHubActionsImage.UbuntuLatest,
     On = new[] { GitHubActionsTrigger.Push },
-    InvokedTargets = new[] { nameof(Pack) },
     FetchDepth = 0)]
 class Build : NukeBuild
 {
@@ -82,5 +81,5 @@ class Build : NukeBuild
                 .EnableNoBuild());
         });
 
-    public static int Main() => Execute<Build>(x => x.Pack);
+    public static int Main() => Execute<Build>(x => x.Test);
 }

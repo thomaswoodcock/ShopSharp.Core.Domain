@@ -33,9 +33,5 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: Run './build.cmd Pack'
-        run: ./build.cmd Pack
-      - uses: actions/upload-artifact@v3
-        with:
-          name: packages
-          path: artifacts/packages
+      - name: Run './build.cmd '
+        run: ./build.cmd 
