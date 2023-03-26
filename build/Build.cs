@@ -34,7 +34,7 @@ class Build : NukeBuild
 
     Target Restore => _ => _
         .Description("Restores project dependencies")
-        .DependsOn(Clean)
+        .After(Clean)
         .Executes(() =>
         {
             DotNetRestore(settings => settings.SetProjectFile(Solution));
@@ -42,7 +42,7 @@ class Build : NukeBuild
 
     Target Compile => _ => _
         .Description("Builds the project")
-        .DependsOn(Restore)
+        .DependsOn(Clean, Restore)
         .Executes(() =>
         {
             DotNetBuild(settings => settings
@@ -68,8 +68,8 @@ class Build : NukeBuild
 
     Target Pack => _ => _
         .Description("Generates the project package")
-        .DependsOn(Test)
-        .Produces(PackageDirectory)
+        .DependsOn(Compile)
+        .After(Compile)
         .Executes(() =>
         {
             EnsureCleanDirectory(ArtifactDirectory);
