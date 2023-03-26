@@ -1,10 +1,13 @@
 using Nuke.Common;
 using Nuke.Common.CI.GitHubActions;
+using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
+using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
+using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions(
@@ -17,7 +20,11 @@ class Build : NukeBuild
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
+    [GitRepository] readonly GitRepository GitRepository;
     [GitVersion] readonly GitVersion GitVersion;
+
+    [Parameter] [Secret] readonly string NuGetApiKey;
+    [Parameter] readonly string NuGetSource;
 
     [Solution(GenerateProjects = true)] readonly Solution Solution;
 
@@ -81,6 +88,24 @@ class Build : NukeBuild
                 .SetVersion(GitVersion.NuGetVersionV2)
                 .EnableNoRestore()
                 .EnableNoBuild());
+        });
+
+    Target Publish => _ => _
+        .Description("Publishes the generated project package")
+        .DependsOn(Test, Pack)
+        .Requires(() => NuGetSource)
+        .Requires(() => NuGetApiKey)
+        .OnlyWhenStatic(() => Configuration == Configuration.Release && GitRepository.IsOnMainBranch())
+        .Executes(() =>
+        {
+            GlobFiles(ArtifactDirectory, "*.nupkg", "*.snupkg")
+                .ForEach(file =>
+                {
+                    DotNetNuGetPush(settings => settings
+                        .SetTargetPath(file)
+                        .SetSource(NuGetSource)
+                        .SetApiKey(NuGetApiKey));
+                });
         });
 
     public static int Main() => Execute<Build>(x => x.Test);
