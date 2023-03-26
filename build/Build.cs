@@ -1,41 +1,47 @@
 using Nuke.Common;
 using Nuke.Common.CI.GitHubActions;
+using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
+using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
+using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions(
     "continuous",
     GitHubActionsImage.UbuntuLatest,
     On = new[] { GitHubActionsTrigger.Push },
-    InvokedTargets = new[] { nameof(Pack) },
     FetchDepth = 0)]
 class Build : NukeBuild
 {
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
+    [GitRepository] readonly GitRepository GitRepository;
     [GitVersion] readonly GitVersion GitVersion;
+
+    [Parameter] [Secret] readonly string NuGetApiKey;
+    [Parameter] readonly string NuGetSource;
 
     [Solution(GenerateProjects = true)] readonly Solution Solution;
 
     static AbsolutePath ArtifactDirectory => RootDirectory / "artifacts";
-    static AbsolutePath PackageDirectory => ArtifactDirectory / "packages";
 
     Target Clean => _ => _
-        .Description("Cleans the project and build artifact directory")
+        .Description("Cleans the project")
         .Executes(() =>
         {
-            EnsureCleanDirectory(ArtifactDirectory);
-            DotNetClean(settings => settings.SetProject(Solution));
+            DotNetClean(settings => settings
+                .SetProject(Solution)
+                .SetConfiguration(Configuration));
         });
 
     Target Restore => _ => _
         .Description("Restores project dependencies")
-        .DependsOn(Clean)
+        .After(Clean)
         .Executes(() =>
         {
             DotNetRestore(settings => settings.SetProjectFile(Solution));
@@ -43,7 +49,7 @@ class Build : NukeBuild
 
     Target Compile => _ => _
         .Description("Builds the project")
-        .DependsOn(Restore)
+        .DependsOn(Clean, Restore)
         .Executes(() =>
         {
             DotNetBuild(settings => settings
@@ -69,18 +75,38 @@ class Build : NukeBuild
 
     Target Pack => _ => _
         .Description("Generates the project package")
-        .DependsOn(Test)
-        .Produces(PackageDirectory)
+        .DependsOn(Compile)
+        .After(Compile)
         .Executes(() =>
         {
+            EnsureCleanDirectory(ArtifactDirectory);
+
             DotNetPack(settings => settings
                 .SetProject(Solution.ShopSharp_Core_Domain)
                 .SetConfiguration(Configuration)
-                .SetOutputDirectory(PackageDirectory)
+                .SetOutputDirectory(ArtifactDirectory)
                 .SetVersion(GitVersion.NuGetVersionV2)
                 .EnableNoRestore()
                 .EnableNoBuild());
         });
 
-    public static int Main() => Execute<Build>(x => x.Pack);
+    Target Publish => _ => _
+        .Description("Publishes the generated project package")
+        .DependsOn(Test, Pack)
+        .Requires(() => NuGetSource)
+        .Requires(() => NuGetApiKey)
+        .OnlyWhenStatic(() => Configuration == Configuration.Release && GitRepository.IsOnMainBranch())
+        .Executes(() =>
+        {
+            GlobFiles(ArtifactDirectory, "*.nupkg", "*.snupkg")
+                .ForEach(file =>
+                {
+                    DotNetNuGetPush(settings => settings
+                        .SetTargetPath(file)
+                        .SetSource(NuGetSource)
+                        .SetApiKey(NuGetApiKey));
+                });
+        });
+
+    public static int Main() => Execute<Build>(x => x.Test);
 }
