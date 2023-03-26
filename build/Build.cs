@@ -24,11 +24,12 @@ class Build : NukeBuild
     static AbsolutePath ArtifactDirectory => RootDirectory / "artifacts";
 
     Target Clean => _ => _
-        .Description("Cleans the project and build artifact directory")
+        .Description("Cleans the project")
         .Executes(() =>
         {
-            EnsureCleanDirectory(ArtifactDirectory);
-            DotNetClean(settings => settings.SetProject(Solution));
+            DotNetClean(settings => settings
+                .SetProject(Solution)
+                .SetConfiguration(Configuration));
         });
 
     Target Restore => _ => _
@@ -71,6 +72,8 @@ class Build : NukeBuild
         .Produces(PackageDirectory)
         .Executes(() =>
         {
+            EnsureCleanDirectory(ArtifactDirectory);
+
             DotNetPack(settings => settings
                 .SetProject(Solution.ShopSharp_Core_Domain)
                 .SetConfiguration(Configuration)
