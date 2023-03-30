@@ -13,7 +13,7 @@ public abstract class AggregateRoot
     /// <value>
     /// A read-only list of uncommitted domain events.
     /// </value>
-    public IReadOnlyList<DomainEvent> UncommittedDomainEvents => _uncommittedDomainEvents;
+    public IEnumerable<DomainEvent> UncommittedDomainEvents => _uncommittedDomainEvents;
 
     /// <summary>
     /// Marks all uncommitted domain events associated with this aggregate root as committed.
