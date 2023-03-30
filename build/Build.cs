@@ -3,9 +3,9 @@ using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
+using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
-using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -100,14 +100,13 @@ class Build : NukeBuild
         .OnlyWhenStatic(() => Configuration == Configuration.Release && GitRepository.IsOnMainBranch())
         .Executes(() =>
         {
-            GlobFiles(ArtifactDirectory, "*.nupkg")
-                .ForEach(file =>
-                {
-                    DotNetNuGetPush(_ => _
-                        .SetTargetPath(file)
-                        .SetSource(NuGetSource)
-                        .SetApiKey(NuGetApiKey));
-                });
+            var packages = GlobFiles(ArtifactDirectory, "*.nupkg");
+
+            DotNetNuGetPush(_ => _
+                .SetSource(NuGetSource)
+                .SetApiKey(NuGetApiKey)
+                .CombineWith(packages, (_, package) => _
+                    .SetTargetPath(package)));
         });
 
     public static int Main() => Execute<Build>(x => x.Test);

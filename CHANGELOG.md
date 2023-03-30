@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Updated NUKE build to use discard variables throughout.
+- Updated NUKE build to use `CombineWith` and discard variables throughout.
 
 ## v0.3.2 - 2023-03-30
 
