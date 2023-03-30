@@ -1,4 +1,6 @@
-﻿namespace ShopSharp.Core.Domain.Aggregates;
+﻿using ShopSharp.Core.Domain.Events;
+
+namespace ShopSharp.Core.Domain.Aggregates;
 
 /// <summary>
 /// Represents an aggregate root in the domain model.

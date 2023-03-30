@@ -1,4 +1,4 @@
-﻿namespace ShopSharp.Core.Domain.Aggregates;
+﻿namespace ShopSharp.Core.Domain.Events;
 
 /// <summary>
 /// Represents an event that occurs in the domain model.

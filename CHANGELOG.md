@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Changed `AggregateRoot.UncommittedDomainEvents` to `IEnumerable`.
+- Moved `DomainEvent` to `ShopSharp.Core.Domain.Events` namespace.
 
 ## v0.3.0 - 2023-03-27
 
