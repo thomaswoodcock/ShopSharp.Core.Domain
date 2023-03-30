@@ -13,7 +13,7 @@ public abstract class AggregateRoot
     /// Gets the uncommitted domain events associated with this aggregate root.
     /// </summary>
     /// <value>
-    /// A read-only list of uncommitted domain events.
+    /// An enumerable collection of uncommitted domain events.
     /// </value>
     public IEnumerable<DomainEvent> UncommittedDomainEvents => _uncommittedDomainEvents;
 
@@ -26,7 +26,7 @@ public abstract class AggregateRoot
     }
 
     /// <summary>
-    /// Adds a domain event to the list of uncommitted domain events and applies it to the aggregate root.
+    /// Adds a domain event to the collection of uncommitted domain events and applies it to the aggregate root.
     /// </summary>
     /// <param name="domainEvent">The domain event to raise and apply.</param>
     protected void AddAndApplyDomainEvent(DomainEvent domainEvent)
