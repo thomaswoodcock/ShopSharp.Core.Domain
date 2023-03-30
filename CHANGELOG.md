@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3.2 - 2023-03-30
+
+### Changed
+
+- Updated `AggregateRoot` documentation to better reflect the `UncommittedDomainEvents` type change.
+
 ## v0.3.1 - 2023-03-30
 
 ### Changed
