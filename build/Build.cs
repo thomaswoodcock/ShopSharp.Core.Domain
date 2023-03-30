@@ -36,7 +36,7 @@ class Build : NukeBuild
         .Description("Cleans the project")
         .Executes(() =>
         {
-            DotNetClean(settings => settings
+            DotNetClean(_ => _
                 .SetProject(Solution)
                 .SetConfiguration(Configuration));
         });
@@ -46,7 +46,8 @@ class Build : NukeBuild
         .After(Clean)
         .Executes(() =>
         {
-            DotNetRestore(settings => settings.SetProjectFile(Solution));
+            DotNetRestore(_ => _
+                .SetProjectFile(Solution));
         });
 
     Target Compile => _ => _
@@ -54,7 +55,7 @@ class Build : NukeBuild
         .DependsOn(Clean, Restore)
         .Executes(() =>
         {
-            DotNetBuild(settings => settings
+            DotNetBuild(_ => _
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
                 .SetAssemblyVersion(GitVersion.AssemblySemVer)
@@ -68,7 +69,7 @@ class Build : NukeBuild
         .DependsOn(Compile)
         .Executes(() =>
         {
-            DotNetTest(settings => settings
+            DotNetTest(_ => _
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
                 .EnableNoRestore()
@@ -83,7 +84,7 @@ class Build : NukeBuild
         {
             EnsureCleanDirectory(ArtifactDirectory);
 
-            DotNetPack(settings => settings
+            DotNetPack(_ => _
                 .SetProject(Solution.ShopSharp_Core_Domain)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactDirectory)
@@ -102,7 +103,7 @@ class Build : NukeBuild
             GlobFiles(ArtifactDirectory, "*.nupkg")
                 .ForEach(file =>
                 {
-                    DotNetNuGetPush(settings => settings
+                    DotNetNuGetPush(_ => _
                         .SetTargetPath(file)
                         .SetSource(NuGetSource)
                         .SetApiKey(NuGetApiKey));
