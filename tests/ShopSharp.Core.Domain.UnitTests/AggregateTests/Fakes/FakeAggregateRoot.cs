@@ -1,4 +1,5 @@
 ﻿using ShopSharp.Core.Domain.Aggregates;
+using ShopSharp.Core.Domain.Events;
 
 namespace ShopSharp.Core.Domain.AggregateTests.Fakes;
 
