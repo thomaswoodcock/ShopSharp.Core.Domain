@@ -45,7 +45,7 @@ It also keeps track of uncommitted domain events and provides a method to mark t
 To create a custom domain event, derive a new record from the `DomainEvent` abstract record:
 
 ```csharp
-using ShopSharp.Core.Domain.Aggregates;
+using ShopSharp.Core.Domain.Events;
 
 public record OrderPlaced(Guid OrderId, DateTime OrderDate) : DomainEvent;
 ```
@@ -56,10 +56,10 @@ To create an aggregate root, derive a new class from the `AggregateRoot` abstrac
 
 ```csharp
 using ShopSharp.Core.Domain.Aggregates;
+using ShopSharp.Core.Domain.Events;
 
 public class Order : AggregateRoot
 {
-    public Guid Id { get; private set; }
     public DateTime OrderDate { get; private set; }
 
     public void PlaceOrder(Guid id, DateTime orderDate)
