@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.0 - 2023-04-01
+
+### Added
+
+- `Id` property to `AggregateRoot` abstract class.
+
 ## v0.3.3 - 2023-03-30
 
 ### Changed

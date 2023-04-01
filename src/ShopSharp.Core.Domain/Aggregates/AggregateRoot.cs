@@ -10,6 +10,14 @@ public abstract class AggregateRoot
     private readonly List<DomainEvent> _uncommittedDomainEvents = new();
 
     /// <summary>
+    /// Gets or sets the unique identifier of the aggregate root.
+    /// </summary>
+    /// <value>
+    /// The unique identifier of the aggregate root.
+    /// </value>
+    public Guid Id { get; protected set; }
+
+    /// <summary>
     /// Gets the uncommitted domain events associated with this aggregate root.
     /// </summary>
     /// <value>
