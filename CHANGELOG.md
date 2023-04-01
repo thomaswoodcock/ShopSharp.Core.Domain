@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.1 - 2023-04-01
+
+### Fixed
+
+- README examples.
+
 ## v0.4.0 - 2023-04-01
 
 ### Added
